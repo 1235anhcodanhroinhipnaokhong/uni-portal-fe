@@ -1,90 +1,73 @@
-import { createContext, useContext, useEffect, useState } from 'react';
-import axios from '@/lib/axios';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem('token') || '');
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [token, setToken] = useState(localStorage.getItem('token') || null);
+  const [isAuthenticated, setIsAuthenticated] = useState(!!token);
 
+  // Khởi tạo interceptor
   useEffect(() => {
     if (token) {
-      setIsAuthenticated(true);
-      // Fetch user info nếu cần hoặc lấy từ localStorage
-      const userInfo = JSON.parse(localStorage.getItem('user'));
-      if (userInfo) {
-        setUser(userInfo);
-      }
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    } else {
+      delete axios.defaults.headers.common['Authorization'];
     }
   }, [token]);
 
-  const login = async (email, password) => {
-    try {
-      const res = await axios.post('/auth/login', { email, password });
-      setToken(res.data.token);
-      setUser(res.data.user);
-      setIsAuthenticated(true);
-      localStorage.setItem('token', res.data.token);
-      localStorage.setItem('user', JSON.stringify(res.data.user));
-      return { success: true };
-    } catch (err) {
-      console.error('Login failed:', err.response?.data || err.message);
-      return {
-        success: false,
-        error: err.response?.data?.message || 'Đăng nhập thất bại',
-      };
+  // Lấy user khi có token
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await axios.get('/auth/me');
+        setUser(res.data.user);
+        setIsAuthenticated(true);
+      } catch (err) {
+        console.error('Không thể lấy user:', err);
+        logout();
+      }
+    };
+
+    if (token && !user) {
+      fetchUser();
     }
+  }, [token]);
+
+  const login = async (credentials) => {
+    const res = await axios.post('/auth/login', credentials);
+    const { token, user } = res.data;
+    localStorage.setItem('token', token);
+    setToken(token);
+    setUser(user);
+    setIsAuthenticated(true);
+    navigate('/');
   };
 
-  const logout = async () => {
-    try {
-      await axios.post('/auth/logout');
-    } catch (err) {
-      console.warn(
-        'Logout error (ignore if backend not implemented):',
-        err.message
-      );
-    }
-    setUser(null);
-    setToken('');
-    setIsAuthenticated(false);
+  const logout = () => {
     localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    setToken(null);
+    setUser(null);
+    setIsAuthenticated(false);
+    navigate('/login');
   };
 
-  const register = async (email, password, role) => {
-    try {
-      const res = await axios.post('/auth/register', {
-        email,
-        password,
-        role,
-      });
-      setToken(res.data.token);
-      setUser(res.data.user);
-      setIsAuthenticated(true);
-      localStorage.setItem('token', res.data.token);
-      localStorage.setItem('user', JSON.stringify(res.data.user));
-      return { success: true };
-    } catch (err) {
-      console.error('Register failed:', err.response?.data || err.message);
-      return {
-        success: false,
-        error: err.response?.data?.message || 'Đăng ký thất bại',
-      };
-    }
+  const register = async (formData) => {
+    const res = await axios.post('/auth/register', formData);
+    const { token, user } = res.data;
+    localStorage.setItem('token', token);
+    setToken(token);
+    setUser(user);
+    setIsAuthenticated(true);
+    navigate('/');
   };
 
   return (
     <AuthContext.Provider
-      value={{
-        user,
-        token,
-        isAuthenticated,
-        login,
-        logout,
-        register,
-      }}
+      value={{ user, token, isAuthenticated, login, logout, register }}
     >
       {children}
     </AuthContext.Provider>

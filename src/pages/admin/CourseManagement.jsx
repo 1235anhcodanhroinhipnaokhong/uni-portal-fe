@@ -17,7 +17,7 @@ export default function CourseManagement() {
   const fetchCourses = async () => {
     try {
       const res = await getAllCourses();
-      setCourses(res.data); // <-- chuẩn theo course.api.js
+      setCourses(res.data);
     } catch (err) {
       console.error('Failed to fetch courses:', err);
     }

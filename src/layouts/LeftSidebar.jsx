@@ -1,17 +1,39 @@
 // src/components/layout/LeftSidebar.jsx
+import { useAuth } from '@/providers/authContext';
 import { NavLink } from 'react-router-dom';
 
-const navItems = [
-  { label: 'Khóa học', path: '/courses' },
-  { label: 'Chương học', path: '/course-sections' },
-  { label: 'Lịch học', path: '/schedules' },
-  { label: 'Bảng điểm', path: '/scores' },
-  { label: 'Sinh viên', path: '/students' },
-  { label: 'Giảng viên', path: '/teachers' },
-  { label: 'Người dùng', path: '/users' },
+const navItemsAdmin = [
+  { label: 'Quản lý khóa học', path: '/courses-manage' },
+  { label: 'Quản lý chương học', path: '/sections-manage' },
+  { label: 'Quản lý lịch học', path: '/schedules-manage' },
+  { label: 'Quản lý bảng điểm', path: '/scores-manage' },
+  { label: 'Quản lý sinh viên', path: '/students-manage' },
+  { label: 'Quản lý giảng viên', path: '/teachers-manage' },
+  { label: 'Quản lý người dùng', path: '/users-manage' },
 ];
-
+const navItemsStudent = [
+  { label: 'Xem chương trình đào tạo', path: '/courses' },
+  { label: 'Đăng ký môn học', path: '/section-register' },
+  { label: 'Xem thời khóa biểu', path: '/schedules' },
+  { label: 'Xem điểm', path: '/scores' },
+  { label: 'Xem thông tin', path: '/user-info' },
+];
+const navItemsTeacher = [
+  { label: 'Xem chương trình đào tạo', path: '/courses' },
+  { label: 'Xem thời khóa biểu', path: '/schedules' },
+  { label: 'Xem điểm', path: '/scores' },
+  { label: 'Xem thông tin', path: '/user-info' },
+];
 export default function LeftSidebar() {
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
+  const isStudent = user?.role === 'student';
+  const navItems = isAdmin
+    ? navItemsAdmin
+    : isStudent
+    ? navItemsStudent
+    : navItemsTeacher;
+
   return (
     <aside className="w-64 bg-gray-800 text-white p-4 space-y-4">
       <h2 className="text-xl font-bold mb-4">Quản lý đào tạo</h2>

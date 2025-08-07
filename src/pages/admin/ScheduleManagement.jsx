@@ -23,6 +23,7 @@ export default function ScheduleManagement() {
     try {
       const res = await getAllSchedules();
       setSchedules(res.data);
+      console.log(res.data);
     } catch (err) {
       console.error('❌ Failed to fetch schedules:', err);
     }

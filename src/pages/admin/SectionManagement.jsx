@@ -24,7 +24,7 @@ export default function SectionManagement() {
   const fetchSections = async () => {
     try {
       const res = await getAllSections();
-      setSections(res.data); // ✅ sửa chỗ này
+      setSections(res.data);
     } catch (err) {
       console.error('Failed to fetch sections:', err);
     }

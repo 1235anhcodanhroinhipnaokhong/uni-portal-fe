@@ -18,8 +18,10 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
+import { useAuth } from '@/providers/authContext';
 
 export default function UserManagementPage() {
+  const { user } = useAuth();
   const [users, setUsers] = useState([]);
   const [formData, setFormData] = useState({
     username: '',
@@ -30,12 +32,20 @@ export default function UserManagementPage() {
   const [editingUserId, setEditingUserId] = useState(null);
 
   useEffect(() => {
-    fetchUsers();
-  }, []);
+    if (user) {
+      fetchUsers();
+      console.log(user);
+    }
+  }, [user]);
 
   const fetchUsers = async () => {
-    const data = await getAllUsers();
-    setUsers(data);
+    try {
+      const { data } = await getAllUsers();
+      setUsers(data);
+      console.log(data);
+    } catch (error) {
+      console.error('Loi fetch users', error);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -64,81 +74,109 @@ export default function UserManagementPage() {
     await deleteUser(id);
     fetchUsers();
   };
-
+  if (!user) {
+    return (
+      <p className="text-center py-10">Đang tải thông tin người dùng...</p>
+    );
+  }
   return (
-    <div className="p-6 space-y-8">
-      <h2 className="text-2xl font-bold">Quản lý người dùng</h2>
+    <div className="p-8 space-y-10 max-w-4xl mx-auto">
+      <h2 className="text-3xl font-bold text-center text-primary">
+        Quản lý người dùng
+      </h2>
 
-      <form onSubmit={handleSubmit} className="space-y-4 max-w-md">
-        <div>
-          <Label>Tên người dùng</Label>
-          <Input
-            type="username"
-            value={formData.username}
-            onChange={(e) =>
-              setFormData({ ...formData, username: e.target.value })
-            }
-            required
-          />
-          <Label>Email</Label>
-          <Input
-            type="email"
-            value={formData.email}
-            onChange={(e) =>
-              setFormData({ ...formData, email: e.target.value })
-            }
-            required
-          />
-        </div>
-        <div>
-          <Label>Mật khẩu</Label>
-          <Input
-            type="password"
-            value={formData.password}
-            onChange={(e) =>
-              setFormData({ ...formData, password: e.target.value })
-            }
-            required={!editingUserId}
-            placeholder={editingUserId ? 'Để trống nếu không đổi' : ''}
-          />
-        </div>
-        <div>
-          <Label>Vai trò</Label>
-          <Select
-            value={formData.role}
-            onValueChange={(value) => setFormData({ ...formData, role: value })}
-          >
-            <SelectTrigger className="">
-              <SelectValue placeholder="Chọn vai trò" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectLabel>Vai trò</SelectLabel>
-                <SelectItem value="student">Sinh viên</SelectItem>
-                <SelectItem value="teacher">Giảng viên</SelectItem>
-                <SelectItem value="admin">Quản trị viên</SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+      {/* Form */}
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white p-6 rounded-2xl shadow-md space-y-6 border border-gray-200"
+      >
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-2">
+            <Label htmlFor="username">Tên người dùng</Label>
+            <Input
+              id="username"
+              type="text"
+              value={formData.username}
+              onChange={(e) =>
+                setFormData({ ...formData, username: e.target.value })
+              }
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              value={formData.email}
+              onChange={(e) =>
+                setFormData({ ...formData, email: e.target.value })
+              }
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="password">Mật khẩu</Label>
+            <Input
+              id="password"
+              type="password"
+              value={formData.password}
+              onChange={(e) =>
+                setFormData({ ...formData, password: e.target.value })
+              }
+              required={!editingUserId}
+              placeholder={editingUserId ? 'Để trống nếu không đổi' : ''}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Vai trò</Label>
+            <Select
+              value={formData.role}
+              onValueChange={(value) =>
+                setFormData({ ...formData, role: value })
+              }
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Chọn vai trò" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>Vai trò</SelectLabel>
+                  <SelectItem value="student">Sinh viên</SelectItem>
+                  <SelectItem value="teacher">Giảng viên</SelectItem>
+                  <SelectItem value="admin">Quản trị viên</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
-        <Button type="submit">
-          {editingUserId ? 'Cập nhật người dùng' : 'Thêm người dùng'}
-        </Button>
+        <div className="pt-4 text-end">
+          <Button type="submit">
+            {editingUserId ? 'Cập nhật người dùng' : 'Thêm người dùng'}
+          </Button>
+        </div>
       </form>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* User Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {users.length > 0 &&
           users.map((user) => (
-            <Card key={user._id}>
-              <CardContent className="space-y-2">
-                <p>
-                  <strong>Email:</strong> {user.email}
-                </p>
-                <p>
-                  <strong>Vai trò:</strong> {user.role}
-                </p>
-                <div className="space-x-2">
+            <Card key={user._id} className="hover:shadow-lg transition-shadow">
+              <CardContent className="space-y-4 p-4">
+                <div className="space-y-1">
+                  <p className="font-semibold text-lg">{user.username}</p>
+                  <p className="text-sm text-muted-foreground">
+                    <strong>Email:</strong> {user.email}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    <strong>Vai trò:</strong> {user.role}
+                  </p>
+                </div>
+                <div className="flex justify-end gap-2">
                   <Button size="sm" onClick={() => handleEdit(user)}>
                     Sửa
                   </Button>

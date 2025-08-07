@@ -14,8 +14,9 @@ export default function TeacherManagement() {
 
   const fetchTeachers = async () => {
     try {
-      const data = await getAllTeachers();
+      const { data } = await getAllTeachers();
       setTeachers(data);
+      console.log(data);
     } catch (error) {
       console.error('Lỗi khi load teachers:', error);
     }
@@ -101,22 +102,23 @@ export default function TeacherManagement() {
           </tr>
         </thead>
         <tbody>
-          {teachers.map((teacher) => (
-            <tr key={teacher._id}>
-              <td className="border p-2">{teacher.name}</td>
-              <td className="border p-2">{teacher.email}</td>
-              <td className="border p-2">{teacher.department}</td>
-              <td className="border p-2 space-x-2">
-                <Button onClick={() => handleEdit(teacher)}>Sửa</Button>
-                <Button
-                  variant="destructive"
-                  onClick={() => handleDelete(teacher._id)}
-                >
-                  Xoá
-                </Button>
-              </td>
-            </tr>
-          ))}
+          {teachers.length > 0 &&
+            teachers.map((teacher) => (
+              <tr key={teacher._id}>
+                <td className="border p-2">{teacher.name}</td>
+                <td className="border p-2">{teacher.email}</td>
+                <td className="border p-2">{teacher.department}</td>
+                <td className="border p-2 space-x-2">
+                  <Button onClick={() => handleEdit(teacher)}>Sửa</Button>
+                  <Button
+                    variant="destructive"
+                    onClick={() => handleDelete(teacher._id)}
+                  >
+                    Xoá
+                  </Button>
+                </td>
+              </tr>
+            ))}
         </tbody>
       </table>
     </div>

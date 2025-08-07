@@ -9,34 +9,34 @@ import ScheduleManagement from '@/pages/admin/ScheduleManagement';
 import ScoreManagement from '@/pages/admin/ScoreManagement';
 
 const adminRoutes = {
-  path: '/admin',
+  path: '/',
   children: [
     {
-      path: 'users',
+      path: 'users-manage',
       element: <UserManagement />,
     },
     {
-      path: 'teachers',
+      path: 'teachers-manage',
       element: <TeacherManagement />,
     },
     {
-      path: 'students',
+      path: 'students-manage',
       element: <StudentManagement />,
     },
     {
-      path: 'courses',
+      path: 'courses-manage',
       element: <CourseManagement />,
     },
     {
-      path: 'sections',
+      path: 'sections-manage',
       element: <SectionManagement />,
     },
     {
-      path: 'schedules',
+      path: 'schedules-manage',
       element: <ScheduleManagement />,
     },
     {
-      path: 'scores',
+      path: 'scores-manage',
       element: <ScoreManagement />,
     },
   ],
